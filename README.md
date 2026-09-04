@@ -1,185 +1,192 @@
 # DNA Melting Temp Salt Corrected
 
-> **Domain:** Clinical Decision Support & Biomedical Computing  
-> **Reference Guidelines & Standards:** `Standard Clinical Formulations & ISO/IEC Quality Frameworks`
+> **Domain:** Bioinformatics & DNA Primer Design
 
 <div align="center">
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 ![Python](https://img.shields.io/badge/Python-3.10%20%7C%203.11%20%7C%203.12-3776AB.svg?logo=python&logoColor=white)
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.111-009688.svg?logo=fastapi&logoColor=white)
-![Audit Trail](https://img.shields.io/badge/Audit-HMAC--SHA256_Tamper--Evident-brightgreen.svg)
-![Zero-PHI Guard](https://img.shields.io/badge/Guard-Zero--PHI_Outbound-blue.svg)
-![Docker](https://img.shields.io/badge/Docker-Ready-2496ED.svg?logo=docker&logoColor=white)
 
 </div>
 
 ---
 
-## 📖 What It Does
+## What It Does
 
-Mg2+ Correction Extension for Oligo Melting Temperature
-Implements Owczarzy 2008 formula for divalent cation correction and
-Aho formula for combined monovalent + divalent salt effective concentration.
+DNA melting temperature (Tm) calculator with salt corrections for oligonucleotide primers. Implements:
 
-References:
-  - Owczarzy et al. (2008) Biochemistry 47(19):5336-5353
-  - Aho et al. (2008) Nucleic Acids Res 36(11):e63
+- **Owczarzy 2004** monovalent cation salt correction
+- **Owczarzy 2008** divalent cation (Mg2+) correction
+- **Aho formula** for combined monovalent + divalent salt effective concentration
+- **Multi-primer pair comparison** and ranking by Tm matching, GC balance, and secondary structure
 
-Multi-Primer Pair Comparison Engine
-Compare and rank multiple primer pairs by Tm matching, GC balance,
-and secondary structure absence.
-
----
-
-## ⚙️ Key Capabilities & Algorithmic Modules
-
-### 🔬 Analytical Functions
-
-- **`compute_effective_salt_concentration()`**: Compute effective monovalent cation concentration using the Aho formula.
-
-When Mg2+ is present, the effective monovalent salt concentration is:
-    ratio = sqrt(oligo_conc_nM * 1e-9) / (3.0 * mg_mM * 1e-3)
-    if ratio < 0.22:
-        Na_eq = 3.79 * sqrt(oligo_conc_nM * 1e-9) / (3.0 * mg_mM * 1e-3)
-        Na_eq = Na_eq * Na_eq * 3.0 * mg_mM * 1e-3
-    else:
-        Na_eq = Na + 140 * Mg (simplified)
-
-Args:
-    na_mM: Monovalent cation (Na+/K+) concentration in mM.
-    mg_mM: Divalent cation (Mg2+) concentration in mM.
-    oligo_conc_nM: Oligonucleotide concentration in nM.
-
-Returns:
-    Effective monovalent salt concentration in M.
-- **`owczarzy_2004_salt_correction()`**: Apply Owczarzy 2004 monovalent cation salt correction.
-
-ΔTm = (4.29 * f_GC - 3.95) * ln(Na+) + 0.940 * (ln(Na+))^2
-
-Args:
-    tm_nn: Nearest-neighbor Tm without salt correction (°C).
-    na_M: Monovalent cation concentration in M.
-    f_GC: Fraction of G/C bases (0.0 - 1.0).
-
-Returns:
-    Salt-corrected Tm in °C.
-- **`owczarzy_2008_mg_correction()`**: Apply Owczarzy 2008 Mg2+ correction to nearest-neighbor Tm.
-
-For Mg2+ containing buffers:
-    a = 3.92 * (0.843 - 0.352 * sqrt(Na+) * ln(Na+))
-    d = 1.42 * (1.279 - 4.03e-3 * ln(Na+) - 8.03e-3 * (ln(Na+))^2)
-    g = 8.31 * (0.486 - 0.258 * ln(Na+) + 5.25e-3 * (ln(Na+))^3)
-
-    1/Tm(Mg) = 1/Tm(Na) + a + b*ln(Mg) + f_GC*(c + d*ln(Mg)) + 1/(2*(Nbp-1)) * (e + f*ln(Mg) + g*(ln(Mg))^2)
-
-Args:
-    tm_nn: Nearest-neighbor Tm with Na+ correction (°C).
-    na_M: Monovalent cation concentration in M.
-    mg_M: Divalent Mg2+ concentration in M.
-    f_GC: Fraction of G/C bases (0.0 - 1.0).
-
-Returns:
-    Mg2+-corrected Tm in °C.
-- **`calculate_tm_with_mg2()`**: Calculate Tm with full salt and Mg2+ correction.
-
-Args:
-    sequence: DNA primer sequence (5' to 3').
-    na_mM: Na+ concentration in mM.
-    mg_mM: Mg2+ concentration in mM.
-    oligo_conc_nM: Oligonucleotide concentration in nM.
-    nn_table: Optional nearest-neighbor parameter table.
-
-Returns:
-    Dictionary with Tm values and correction details.
-- **`evaluate_primer_pair()`**: Evaluate a single primer pair with all metrics.
-
-Args:
-    forward: Forward primer sequence.
-    reverse: Reverse primer sequence.
-    na_mM: Na+ concentration in mM.
-    mg_mM: Mg2+ concentration in mM.
-    oligo_conc_nM: Oligo concentration in nM.
-
-Returns:
-    Dictionary with all evaluation metrics.
+### References
+- Owczarzy et al. (2008) Biochemistry 47(19):5336-5353
+- Owczarzy et al. (2004) Biochemistry 43(12):3537-3554
+- Aho et al. (2008) Nucleic Acids Res 36(11):e63
+- SantaLucia (1998) PNAS 95(4):1460-1465
 
 ---
 
-## 📐 Mathematical Formulation & Logic
+## Installation
 
-```text
-  Implements Owczarzy 2008 formula for divalent cation correction and
-  Aho formula for combined monovalent + divalent salt effective concentration.
-  """Compute effective monovalent cation concentration using the Aho formula.
-  """Calculate Tm with full salt and Mg2+ correction.
-  result = calculate_tm_with_mg2("ATCGATCGATCGATCGATCG", na_mM=50, mg_mM=1.5)
+```bash
+# Clone the repository
+git clone https://github.com/abusuraihsakhri/dna-melting-temp-salt-corrected.git
+cd dna-melting-temp-salt-corrected
+
+# Install dependencies
+pip install -e .
+
+# Or install with development dependencies
+pip install -e ".[dev]"
 ```
 
 ---
 
-## 💻 CLI Quickstart & Usage
+## Usage
 
-### 1. Guided Interactive Mode
+### Command Line Interface
+
 ```bash
-python cli.py
+# Calculate Tm for a single sequence
+python -c "from mg2_correction import calculate_tm_with_mg2; import json; print(json.dumps(calculate_tm_with_mg2('ATCGATCGATCGATCGATCG', na_mM=50, mg_mM=1.5), indent=2))"
+
+# Run the oligo Tm calculator
+python oligo_tm.py single --v1 12.0 --v2 4.0
+
+# Batch process from CSV
+python oligo_tm.py batch -i sample.csv -o results.csv
 ```
 
-### 2. Direct Parameterized Evaluation
-```bash
-python cli.py --task-id <value> --target <value> --primary <value> --secondary <value>
+### Python API
+
+```python
+from mg2_correction import calculate_tm_with_mg2, owczarzy_2004_salt_correction, owczarzy_2008_mg_correction
+
+# Calculate Tm with full salt and Mg2+ correction
+result = calculate_tm_with_mg2(
+    sequence="ATCGATCGATCGATCGATCG",
+    na_mM=50.0,      # Na+ concentration in mM
+    mg_mM=1.5,       # Mg2+ concentration in mM
+    oligo_conc_nM=250.0  # Oligonucleotide concentration in nM
+)
+print(result)
+# {
+#     "sequence": "ATCGATCGATCGATCGATCG",
+#     "length": 20,
+#     "gc_fraction": 0.4,
+#     "tm_basic_C": 64.0,
+#     "tm_na_corrected_C": ...,
+#     "tm_mg_corrected_C": ...,
+#     ...
+# }
 ```
 
-### Parameter Reference
-- `--task-id`: Specifies input measurement or parameter value.
-- `--target`: Specifies input measurement or parameter value.
-- `--primary`: Specifies input measurement or parameter value.
-- `--secondary`: Specifies input measurement or parameter value.
-- `--critical`: Specifies input measurement or parameter value.
-- `--status`: Specifies input measurement or parameter value.
-- `--input`: Specifies input measurement or parameter value.
-- `--output`: Specifies input measurement or parameter value.
+### Multi-Primer Comparison
 
-### Input Data Schema
+```python
+from multi_primer_comparison import rank_primer_pairs
 
-| Field | Description | Requirement |
-|:------|:------------|:------------|
-| `Patient_ID` | Parameter / observation metric | Required |
-| `v1` | Parameter / observation metric | Required |
-| `v2` | Parameter / observation metric | Required |
-| `v3` | Parameter / observation metric | Required |
-
----
-
-## 🛡️ Security & Enterprise Architecture
-
-* **Zero-PHI Outbound Interceptor:** Active AST and regex inspection blocking SSNs, MRNs, phone numbers, and patient identifiers.
-* **Tamper-Evident HMAC-SHA256 Audit Trail:** Chained, cryptographically signed logs for every evaluation and state transition.
-* **Air-Gapped LLM Reasoning Adapter:** Agnostic integration for local Ollama instances (`llama3`, `mistral`), Claude 3.5 Sonnet, GPT-4o, and deterministic test mocks.
-* **Active Learning Bayesian Calibration:** Dynamic tracker updating worker reliability weights and monitoring Brier calibration drift.
-* **FastAPI & Prometheus Telemetry:** Exposes OpenAPI 3.1 REST endpoints and operational Prometheus metrics (`/metrics`).
-
----
-
-## 🧪 Testing & Verification
-
-Run the automated test suite:
-
-```bash
-pytest -v
+pairs = [
+    {"id": "pair1", "forward": "ATCGATCGATCGATCG", "reverse": "GCTAGCTAGCTAGCTA"},
+    {"id": "pair2", "forward": "GCGCGCGCGCGCGCGC", "reverse": "ATATATATATATATAT"},
+]
+results = rank_primer_pairs(pairs, na_mM=50, mg_mM=1.5)
 ```
 
-Execute high-throughput batch simulation benchmarks:
+### REST API Server
 
 ```bash
-python simulator.py --tasks 1000 --concurrency 8
-```
+# Start the FastAPI server
+python cli.py serve --host 127.0.0.1 --port 8000
 
----
-
-## 🐳 Container Deployment
-
-```bash
+# Or using Docker
 docker build -t dna-melting-temp-salt-corrected .
 docker run -p 8000:8000 dna-melting-temp-salt-corrected
 ```
+
+API Endpoints:
+- `GET /health` - Health check
+- `GET /metrics` - Prometheus metrics
+- `POST /api/audit` - Submit task for evaluation
+- `POST /api/chat` - Query the system
+- `GET /api/audit/logs` - View audit trail
+
+---
+
+## Core Functions
+
+### `calculate_tm_with_mg2(sequence, na_mM, mg_mM, oligo_conc_nM)`
+Calculate Tm with full salt and Mg2+ correction. Returns a dictionary with Tm values and correction details.
+
+### `owczarzy_2004_salt_correction(tm_nn, na_M, f_GC)`
+Apply Owczarzy 2004 monovalent cation salt correction.
+
+ΔTm = (4.29 * f_GC - 3.95) * ln(Na+) + 0.940 * (ln(Na+))^2
+
+### `owczarzy_2008_mg_correction(tm_nn, na_M, mg_M, f_GC, nbp)`
+Apply Owczarzy 2008 Mg2+ correction to nearest-neighbor Tm.
+
+### `compute_effective_salt_concentration(na_mM, mg_mM, oligo_conc_nM)`
+Compute effective monovalent cation concentration using the Aho formula.
+
+---
+
+## Testing
+
+```bash
+# Run all tests
+pytest -v
+
+# Run specific test modules
+pytest tests/test_mg2_correction.py -v
+pytest tests/test_enrichment.py -v
+pytest test_oligo_tm.py -v
+```
+
+---
+
+## Project Structure
+
+```
+dna-melting-temp-salt-corrected/
+├── mg2_correction.py          # Core Tm calculation with salt corrections
+├── oligo_tm.py                # Oligo Tm calculator CLI
+├── multi_primer_comparison.py # Multi-primer pair comparison engine
+├── secondary_structure.py     # Hairpin and self-dimer prediction
+├── cli.py                     # Main CLI interface
+├── simulator.py               # High-throughput simulation
+├── enrichment.py              # Enrichment feature modules
+├── agents/                    # Enterprise agent framework
+│   ├── base.py               # Security, PHI guard, audit trail
+│   ├── models.py             # Pydantic data models
+│   ├── supervisor.py         # Supervisor orchestrator
+│   ├── workers.py            # Specialized worker agents
+│   ├── api.py                # FastAPI REST server
+│   └── ...
+├── tests/                     # Test suite
+├── pyproject.toml             # Project configuration
+├── Dockerfile                 # Container configuration
+└── README.md
+```
+
+---
+
+## Security
+
+- **PHI Outbound Guard:** AST and regex inspection blocking SSNs, MRNs, phone numbers, and patient identifiers
+- **HMAC-SHA256 Audit Trail:** Chained, cryptographically signed logs for every evaluation
+- **Input Validation:** All inputs validated before processing
+
+Set the audit secret key via environment variable:
+```bash
+export AUDIT_SECRET_KEY="your-secure-key-here"
+```
+
+---
+
+## License
+
+MIT License - see [LICENSE](LICENSE) for details.

@@ -90,13 +90,14 @@ def owczarzy_2008_mg_correction(
     na_M: float,
     mg_M: float,
     f_GC: float,
+    nbp: int = 20,
 ) -> float:
     """Apply Owczarzy 2008 Mg2+ correction to nearest-neighbor Tm.
 
     For Mg2+ containing buffers:
-        a = 3.92 * (0.843 - 0.352 * sqrt(Na+) * ln(Na+))
-        d = 1.42 * (1.279 - 4.03e-3 * ln(Na+) - 8.03e-3 * (ln(Na+))^2)
-        g = 8.31 * (0.486 - 0.258 * ln(Na+) + 5.25e-3 * (ln(Na+))^3)
+        a = 3.92e-3 * (0.843 - 0.352 * sqrt(Na+) * ln(Na+))
+        d = 1.42e-3 * (1.279 - 4.03e-3 * ln(Na+) - 8.03e-3 * (ln(Na+))^2)
+        g = 8.31e-3 * (0.486 - 0.258 * ln(Na+) + 5.25e-3 * (ln(Na+))^3)
 
         1/Tm(Mg) = 1/Tm(Na) + a + b*ln(Mg) + f_GC*(c + d*ln(Mg)) + 1/(2*(Nbp-1)) * (e + f*ln(Mg) + g*(ln(Mg))^2)
 
@@ -105,29 +106,35 @@ def owczarzy_2008_mg_correction(
         na_M: Monovalent cation concentration in M.
         mg_M: Divalent Mg2+ concentration in M.
         f_GC: Fraction of G/C bases (0.0 - 1.0).
+        nbp: Number of base pairs (primer length). Must be >= 2.
 
     Returns:
         Mg2+-corrected Tm in °C.
     """
     if mg_M <= 0 or tm_nn <= 0:
         return tm_nn
+    if nbp < 2:
+        raise ValueError("nbp (number of base pairs) must be >= 2")
 
     tm_K = tm_nn + 273.15
     ln_na = math.log(na_M) if na_M > 0 else -10.0
     ln_mg = math.log(mg_M)
 
-    a = 3.92 * (0.843 - 0.352 * math.sqrt(na_M) * ln_na) if na_M > 0 else 3.92 * 0.843
-    d = 1.42 * (1.279 - 4.03e-3 * ln_na - 8.03e-3 * ln_na ** 2)
-    g = 8.31 * (0.486 - 0.258 * ln_na + 5.25e-3 * ln_na ** 3)
+    a = 3.92e-3 * (0.843 - 0.352 * math.sqrt(na_M) * ln_na) if na_M > 0 else 3.92e-3 * 0.843
+    d = 1.42e-3 * (1.279 - 4.03e-3 * ln_na - 8.03e-3 * ln_na ** 2)
+    g = 8.31e-3 * (0.486 - 0.258 * ln_na + 5.25e-3 * ln_na ** 3)
 
     b = -0.001  # small correction
     c = 0.0
     e = 0.0
     f_coeff = 0.0
-    nbp = 20  # default primer length
 
     inv_tm_mg = (1.0 / tm_K) + a + b * ln_mg + f_GC * (c + d * ln_mg) + \
                 (1.0 / (2.0 * (nbp - 1))) * (e + f_coeff * ln_mg + g * ln_mg ** 2)
+
+    # Guard against division by zero or negative inverse
+    if inv_tm_mg <= 0:
+        return tm_nn
 
     tm_mg_K = 1.0 / inv_tm_mg
     return tm_mg_K - 273.15
@@ -144,17 +151,28 @@ def calculate_tm_with_mg2(
 
     Args:
         sequence: DNA primer sequence (5' to 3').
-        na_mM: Na+ concentration in mM.
-        mg_mM: Mg2+ concentration in mM.
-        oligo_conc_nM: Oligonucleotide concentration in nM.
+        na_mM: Na+ concentration in mM. Must be non-negative.
+        mg_mM: Mg2+ concentration in mM. Must be non-negative.
+        oligo_conc_nM: Oligonucleotide concentration in nM. Must be positive.
         nn_table: Optional nearest-neighbor parameter table.
 
     Returns:
         Dictionary with Tm values and correction details.
     """
+    # Input validation
+    if not isinstance(sequence, str) or not sequence.strip():
+        return {"error": "Invalid sequence: must be a non-empty string"}
+
     seq = sequence.upper().replace(" ", "").replace("\n", "")
     if not seq or not all(b in "ACGT" for b in seq):
         return {"error": "Invalid sequence: only ACGT bases allowed"}
+
+    if na_mM < 0:
+        return {"error": "Invalid na_mM: must be non-negative"}
+    if mg_mM < 0:
+        return {"error": "Invalid mg_mM: must be non-negative"}
+    if oligo_conc_nM <= 0:
+        return {"error": "Invalid oligo_conc_nM: must be positive"}
 
     gc_count = seq.count("G") + seq.count("C")
     f_gc = gc_count / len(seq)
@@ -172,7 +190,7 @@ def calculate_tm_with_mg2(
 
     # Apply Mg2+ correction if present
     if mg_mM > 0:
-        tm_mg_corrected = owczarzy_2008_mg_correction(tm_na_corrected, na_M, mg_M, f_gc)
+        tm_mg_corrected = owczarzy_2008_mg_correction(tm_na_corrected, na_M, mg_M, f_gc, nbp=len(seq))
     else:
         tm_mg_corrected = tm_na_corrected
 
