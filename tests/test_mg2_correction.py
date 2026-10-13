@@ -59,10 +59,11 @@ class TestOwczarzy2008MgCorrection:
         result = owczarzy_2008_mg_correction(tm_nn=60.0, na_M=0.05, mg_M=0.0, f_GC=0.5)
         assert result == 60.0
 
-    def test_zero_tm_returns_uncorrected(self):
-        """Zero Tm should return uncorrected."""
+    def test_zero_celsius_tm_is_corrected(self):
+        """0 °C is a physical temperature, not a missing-value sentinel."""
         result = owczarzy_2008_mg_correction(tm_nn=0.0, na_M=0.05, mg_M=0.001, f_GC=0.5)
-        assert result == 0.0
+        assert result != 0.0
+        assert math.isfinite(result)
 
     def test_positive_mg_applies_correction(self):
         """Positive Mg2+ should apply correction."""
