@@ -40,7 +40,13 @@ jobs:
     - name: Check static browser calculator
       run: node tests/browser_smoke.cjs
 
-    - name: Security SAST & Zero-PHI Audit
+    - name: Audit installed Python dependencies
+      if: matrix.python-version == '3.12'
+      run: |
+        python -m pip install pip-audit
+        pip-audit --skip-editable
+
+    - name: Audit chain and PHI guard smoke check
       run: |
         python -c "
         from agents.base import PHIGuard, AuditLogger
