@@ -7,6 +7,7 @@ from pydantic import BaseModel
 from .base import AuditLogger, PHIGuard
 from .models import SystemTaskPayload, ConsensusDossier
 from .supervisor import SystemSupervisor
+from mg2_correction import calculate_tm_with_mg2
 
 supervisor = SystemSupervisor(model_provider="mock")
 
@@ -33,6 +34,25 @@ def metrics():
         "audit_blocks_total": len(AuditLogger.get_trail()),
         "system_status": "NOMINAL_OPTIMAL"
     }
+
+
+class TmRequest(BaseModel):
+    sequence: str
+    na_mM: float = 50.0
+    mg_mM: float = 1.5
+    oligo_conc_nM: float = 250.0
+
+
+@app.post("/api/tm")
+def api_tm(req: TmRequest):
+    """Estimate salt-corrected Tm for a perfectly matched DNA duplex."""
+    result = calculate_tm_with_mg2(
+        req.sequence, na_mM=req.na_mM, mg_mM=req.mg_mM,
+        oligo_conc_nM=req.oligo_conc_nM,
+    )
+    if "error" in result:
+        raise HTTPException(status_code=422, detail=result["error"])
+    return result
 
 
 @app.post("/api/audit")

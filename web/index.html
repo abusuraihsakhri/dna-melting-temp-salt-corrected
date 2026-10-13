@@ -1,236 +1,197 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dna Melting Temp Salt Corrected — Operations Console</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --bg: #090d16;
-            --card: #111827;
-            --border: #1f293d;
-            --accent: #3b82f6;
-            --accent-glow: rgba(59, 130, 246, 0.25);
-            --text: #f3f4f6;
-            --text-muted: #9ca3af;
-            --danger: #ef4444;
-            --warning: #f59e0b;
-            --success: #10b981;
-        }
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body {
-            font-family: 'Inter', sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            padding: 2rem;
-            min-height: 100vh;
-        }
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid var(--border);
-            padding-bottom: 1.5rem;
-            margin-bottom: 2rem;
-        }
-        .header-title h1 { font-size: 1.6rem; font-weight: 700; color: #fff; }
-        .header-title p { color: var(--text-muted); font-size: 0.9rem; margin-top: 0.25rem; }
-        .badge {
-            display: inline-block;
-            padding: 0.3rem 0.8rem;
-            border-radius: 9999px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            background: var(--accent-glow);
-            color: var(--accent);
-            border: 1px solid var(--accent);
-        }
-        .grid {
-            display: grid;
-            grid-template-columns: 1fr 1.2fr;
-            gap: 1.5rem;
-        }
-        .card {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 1.5rem;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
-        }
-        .card h2 {
-            font-size: 1.1rem;
-            font-weight: 600;
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        .form-group { margin-bottom: 1rem; }
-        label { display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.4rem; }
-        input, select, textarea {
-            width: 100%;
-            padding: 0.65rem 0.9rem;
-            background: #0d1322;
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            color: #fff;
-            font-family: inherit;
-            font-size: 0.9rem;
-        }
-        input:focus, textarea:focus { outline: none; border-color: var(--accent); }
-        .btn {
-            background: var(--accent);
-            color: #fff;
-            border: none;
-            padding: 0.7rem 1.4rem;
-            border-radius: 6px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: 0.2s;
-            width: 100%;
-        }
-        .btn:hover { background: #2563eb; }
-        .terminal {
-            background: #060911;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 1rem;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.85rem;
-            color: #10b981;
-            height: 380px;
-            overflow-y: auto;
-            white-space: pre-wrap;
-        }
-        .metrics-bar {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 1rem;
-            margin-bottom: 1.5rem;
-        }
-        .metric-box {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 1rem;
-            text-align: center;
-        }
-        .metric-val { font-size: 1.4rem; font-weight: 700; color: #fff; margin-top: 0.25rem; }
-        .metric-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; }
-    </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; connect-src 'none'; img-src 'none'; base-uri 'none'; object-src 'none'">
+<meta name="description" content="Local DNA melting temperature calculator using nearest-neighbor thermodynamics with sodium and magnesium corrections.">
+<title>DNA Melting Temperature · Salt-Corrected Calculator</title>
+<style>
+:root{color-scheme:light;--bg:#f4f7fb;--surface:#fff;--text:#172235;--muted:#52647b;--line:#dbe4ee;--blue:#174ec6;--focus:#2563eb;--error:#a5222b}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}main{max-width:1140px;margin:auto;padding:28px 18px 46px}header{margin-bottom:26px}h1{font-size:clamp(1.5rem,3vw,2.1rem);letter-spacing:-.035em;line-height:1.2;margin:0 0 8px}h2{font-size:1.15rem;margin:0 0 17px}p{margin:5px 0;color:var(--muted)}.eyebrow{font-size:.75rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--blue);margin-bottom:7px}.layout{display:grid;grid-template-columns:minmax(300px,.95fr) minmax(310px,1.05fr);gap:18px}.panel{border:1px solid var(--line);border-radius:15px;background:var(--surface);padding:22px;box-shadow:0 2px 12px #233c5b0b}.field{margin-bottom:15px}label{display:block;font-size:.84rem;font-weight:650;margin-bottom:5px}input,textarea{width:100%;border:1px solid #b9c7d8;border-radius:8px;padding:10px 11px;background:white;color:var(--text);font:inherit}textarea{resize:vertical;min-height:92px;font-family:ui-monospace,Menlo,monospace;letter-spacing:.04em}input:focus,textarea:focus,button:focus-visible{outline:3px solid #80b2fd;outline-offset:2px;border-color:var(--focus)}.inputs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.help{font-size:.78rem;color:var(--muted);margin-top:5px}.action{border:0;border-radius:8px;background:var(--blue);color:white;font-weight:650;padding:11px 17px;cursor:pointer}.action:hover{background:#113b9b}.action:disabled{opacity:.45;cursor:not-allowed}.outline{background:transparent;color:var(--blue);border:1px solid var(--blue)}.outline:hover{background:#eff4ff}.output-empty{border:1px dashed var(--line);border-radius:9px;padding:38px 15px;text-align:center;color:var(--muted)}.results{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.metric{border:1px solid var(--line);border-radius:9px;padding:13px}.metric small{display:block;color:var(--muted)}.metric strong{display:block;font-size:1.5rem;letter-spacing:-.02em;font-variant-numeric:tabular-nums}.metric.featured{background:#edf3ff;border-color:#b6cafa}.message{margin:12px 0;padding:11px;border-radius:8px;border:1px solid #f1bdc0;color:var(--error);background:#fff4f4}.detail{margin-top:13px;font-size:.85rem;color:var(--muted)}.section{margin-top:18px}.section h2{margin-bottom:7px}.rows{overflow-x:auto;margin-top:14px}table{border-collapse:collapse;width:100%;font-size:.86rem}th,td{text-align:left;padding:9px;border-bottom:1px solid var(--line);white-space:nowrap}th{background:#f5f8fc;color:#35465f}td{font-variant-numeric:tabular-nums}.file-button{position:relative}.file-button input{max-width:230px;padding:6px;font-size:.8rem}.toolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:12px}footer{font-size:.82rem;margin-top:22px;color:var(--muted)}footer a{color:var(--blue)}.status{font-size:.84rem;color:var(--muted);margin-top:10px}@media(max-width:780px){.layout{grid-template-columns:1fr}main{padding:18px 12px 32px}.panel{padding:17px}}@media(max-width:410px){.inputs{grid-template-columns:1fr 1fr}.inputs .field:last-child{grid-column:span 2}}@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto}}
+</style>
 </head>
 <body>
-
-    <div class="header">
-        <div class="header-title">
-            <h1>Dna Melting Temp Salt Corrected</h1>
-            <p>Domain: Clinical & Cryptographic AI | Standard: CAP / CLSI / NIST Standards | LabMind-Atlas Architecture</p>
-        </div>
-        <div>
-            <span class="badge">Air-Gapped Active</span>
-            <span class="badge" style="background: rgba(16,185,129,0.2); color: #10b981; border-color: #10b981;">Zero-PHI Guard Active</span>
-        </div>
-    </div>
-
-    <div class="metrics-bar">
-        <div class="metric-box">
-            <div class="metric-label">System Status</div>
-            <div class="metric-val" style="color: var(--success);" id="m-status">OPTIMAL</div>
-        </div>
-        <div class="metric-box">
-            <div class="metric-label">Tasks Processed</div>
-            <div class="metric-val" id="m-tasks">142</div>
-        </div>
-        <div class="metric-box">
-            <div class="metric-label">Audit Blocks Signed</div>
-            <div class="metric-val" id="m-audit">142</div>
-        </div>
-        <div class="metric-box">
-            <div class="metric-label">PHI Interceptions</div>
-            <div class="metric-val" style="color: var(--accent);" id="m-phi">0</div>
-        </div>
-    </div>
-
-    <div class="grid">
-        <div class="card">
-            <h2>⚙️ Dispatch Distributed Component Audit</h2>
-            <div class="form-group">
-                <label>Task / Sample ID</label>
-                <input type="text" id="task_id" value="TASK-2026-LIVE-01">
-            </div>
-            <div class="form-group">
-                <label>Target Identifier</label>
-                <input type="text" id="target_id" value="SPECIMEN-ALPHA-77">
-            </div>
-            <div class="form-group">
-                <label>Primary Measurement / Value</label>
-                <input type="number" id="primary_metric" value="29.4" step="0.1">
-            </div>
-            <div class="form-group">
-                <label>Secondary Metric / Kinetic Index</label>
-                <input type="number" id="secondary_metric" value="14.8" step="0.1">
-            </div>
-            <div class="form-group">
-                <label>Status / Phenotype Descriptor</label>
-                <input type="text" id="status_descriptor" value="DISCORDANT_ANOMALY">
-            </div>
-            <div class="form-group">
-                <label><input type="checkbox" id="is_critical" checked> Trigger Emergency / Critical Flag</label>
-            </div>
-            <button class="btn" onclick="runAudit()">Execute Distributed Component Audit</button>
-        </div>
-
-        <div class="card">
-            <h2>📊 Real-Time Consensus Dossier & Audit Log</h2>
-            <div class="terminal" id="outputConsole">// Dna Melting Temp Salt Corrected Operations Console Ready
-// Connection established with Air-Gapped Supervisor
-// Cryptographic HMAC-SHA256 audit ledger loaded.
-// Ready for live task payload dispatch...</div>
-        </div>
-    </div>
-
-    <script>
-        async function runAudit() {
-            const consoleEl = document.getElementById('outputConsole');
-            consoleEl.innerText = "// Dispatching task across specialized workers...
-// Invoking InvariantQCWorker, SafetyEscalationWorker, ProtocolWorker...";
-
-            const payload = {
-                task_id: document.getElementById('task_id').value,
-                target_identifier: document.getElementById('target_id').value,
-                primary_metric: parseFloat(document.getElementById('primary_metric').value),
-                secondary_metric: parseFloat(document.getElementById('secondary_metric').value),
-                status_descriptor: document.getElementById('status_descriptor').value,
-                is_critical_flag: document.getElementById('is_critical').checked
-            };
-
-            try {
-                const res = await fetch('/api/audit', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-                const data = await res.json();
-                consoleEl.innerText = JSON.stringify(data, null, 2);
-                document.getElementById('m-tasks').innerText = parseInt(document.getElementById('m-tasks').innerText) + 1;
-                document.getElementById('m-audit').innerText = parseInt(document.getElementById('m-audit').innerText) + 1;
-            } catch (err) {
-                consoleEl.innerText = "// Offline / Simulation Output:\n" + JSON.stringify({
-                    dossier_id: "DOSSIER-SIM-" + Math.floor(Math.random()*10000),
-                    system: "dna-melting-temp-salt-corrected",
-                    domain: "Clinical & Cryptographic AI",
-                    task_id: payload.task_id,
-                    overall_urgency: payload.is_critical_flag ? "CRITICAL_STAT_PANIC" : "ELEVATED_RISK",
-                    integrity_status: "DISCORDANT_ANOMALY",
-                    alerts: [
-                        { worker: "InvariantQCWorker", alert: "Primary metric exceeds upper reference bound" },
-                        { worker: "SafetyEscalationWorker", alert: "Critical emergency interlock flag active" }
-                    ],
-                    audit_hash: "HMAC_SHA256_e83f9a72b941d6c381f9"
-                }, null, 2);
-            }
-        }
-    </script>
+<main>
+<header>
+<div class="eyebrow">Oligonucleotide thermodynamics · Offline calculator</div>
+<h1>DNA melting temperature</h1>
+<p>Nearest-neighbor Tm for perfect-match DNA duplexes, with Na⁺ and free Mg²⁺ corrections. Computed entirely in your browser.</p>
+</header>
+<div class="layout">
+<section class="panel" aria-labelledby="calc-title">
+<h2 id="calc-title">Single sequence</h2>
+<form id="calc-form">
+<div class="field"><label for="sequence">DNA sequence (5′ → 3′)</label><textarea id="sequence" required spellcheck="false" autocomplete="off">ATCGATCGATCGATCGATCG</textarea><div class="help">A, C, G and T only; spaces/newlines ignored. Minimum 2, maximum 500 bases.</div></div>
+<div class="inputs">
+<div class="field"><label for="na">Na⁺ (mM)</label><input id="na" type="number" value="50" min="0" max="1000" step="any" required></div>
+<div class="field"><label for="mg">Free Mg²⁺ (mM)</label><input id="mg" type="number" value="1.5" min="0" max="100" step="any" required></div>
+<div class="field"><label for="oligo">Total oligo (nM)</label><input id="oligo" type="number" value="250" min="0.001" max="1000000" step="any" required></div>
+</div>
+<button type="submit" class="action">Calculate Tm</button>
+<div id="single-error" class="message" role="alert" hidden></div>
+</form>
+</section>
+<section class="panel" aria-labelledby="result-title">
+<h2 id="result-title">Temperature estimates</h2>
+<div id="empty" class="output-empty">Enter a sequence and select Calculate Tm.</div>
+<div id="single-results" hidden>
+<div class="results">
+<div class="metric featured"><small>Na⁺ + Mg²⁺ corrected</small><strong id="tm-final">—</strong></div>
+<div class="metric"><small>Na⁺ only</small><strong id="tm-na">—</strong></div>
+<div class="metric"><small>Uncorrected NN</small><strong id="tm-nn">—</strong></div>
+<div class="metric"><small>GC content</small><strong id="gc">—</strong></div>
+</div>
+<div class="detail" id="summary"></div>
+</div>
+<p class="detail">Model: SantaLucia/Allawi nearest-neighbor enthalpy and entropy; Owczarzy 2004 (monovalent) and 2008 (mixed ions). Total strand concentration uses the Ct/4 convention. The Mg²⁺ input must represent <strong>free</strong> ion concentration; dNTP chelation, mismatches, hairpins, and additives are not modeled.</p>
+</section>
+</div>
+<section class="panel section" aria-labelledby="batch-title">
+<h2 id="batch-title">Batch calculation and CSV export</h2>
+<p>Paste one sequence per line, FASTA records, or a CSV with a <code>sequence</code> column. Use the same buffer settings as above.</p>
+<div class="field" style="margin-top:12px"><label for="batch">Sequence list</label><textarea id="batch" rows="4" placeholder="ATCGATCGATCGATCGATCG&#10;GCTAGCTAGCTAGCTA"></textarea></div>
+<div class="toolbar">
+<button id="batch-run" class="action" type="button">Calculate batch</button>
+<button id="batch-save" class="action outline" type="button" disabled>Export results (.csv)</button>
+<label class="file-button" for="upload">Or load a text/FASTA/CSV file <input id="upload" type="file" accept=".txt,.fasta,.fa,.csv,text/plain,text/csv"></label>
+</div>
+<div id="batch-status" class="status" role="status" aria-live="polite"></div>
+<div class="rows" id="batch-table" hidden><table><thead><tr><th>ID</th><th>Length</th><th>GC %</th><th>NN Tm °C</th><th>Na Tm °C</th><th>Na+Mg Tm °C</th><th>Error</th></tr></thead><tbody id="batch-body"></tbody></table></div>
+</section>
+<footer><strong>Use:</strong> exploratory primer assessment, not a replacement for experimentally measured Tm. No sequence or file is uploaded, and no cookies, trackers, or external services are required. Source: <a href="https://github.com/abusuraihsakhri/dna-melting-temp-salt-corrected" rel="noopener noreferrer">GitHub repository</a>.</footer>
+</main>
+<script>
+"use strict";
+const NN={AA:[-7.9,-22.2],TT:[-7.9,-22.2],AT:[-7.2,-20.4],TA:[-7.2,-21.3],CA:[-8.5,-22.7],TG:[-8.5,-22.7],GT:[-8.4,-22.4],AC:[-8.4,-22.4],CT:[-7.8,-21],AG:[-7.8,-21],GA:[-8.2,-22.2],TC:[-8.2,-22.2],CG:[-10.6,-27.2],GC:[-9.8,-24.4],GG:[-8,-19.9],CC:[-8,-19.9]};
+const el=id=>document.getElementById(id);
+function readBuffer(){
+ const na=Number(el("na").value),mg=Number(el("mg").value),ct=Number(el("oligo").value);
+ if(![na,mg,ct].every(Number.isFinite)||na<0||mg<0||ct<=0||na>1000||mg>100||ct>1e6||(!na&&!mg))throw Error("Enter valid concentrations and at least one nonzero salt value.");
+ return {na,mg,ct};
+}
+function applyCorrection(tm,corr){
+ const denom=1/(tm+273.15)+corr;
+ if(!(denom>0)||!Number.isFinite(denom))throw Error("Temperature correction is outside the physical range.");
+ return 1/denom-273.15;
+}
+function salt2004(tm,na,gc){
+ if(na<=0)return tm;
+ const l=Math.log(na);
+ return applyCorrection(tm,(4.29*gc-3.95)*1e-5*l+9.4e-6*l*l);
+}
+function salt2008(tm,na,mg,gc,n){
+ if(!mg)return salt2004(tm,na,gc);
+ const ratio=na?Math.sqrt(mg)/na:Infinity;
+ if(ratio<.22)return salt2004(tm,na,gc);
+ let a=3.92,d=1.42,g=8.31;
+ if(ratio<6&&na>0){
+  const l=Math.log(na);
+  a*=.843-.352*Math.sqrt(na)*l;
+  d*=1.279-4.03e-3*l-8.03e-3*l*l;
+  g*=.486-.258*l+5.25e-3*l*l*l;
+ }
+ const l=Math.log(mg);
+ const corr=(a-.911*l+gc*(6.26+d*l)+(-48.2+52.5*l+g*l*l)/(2*(n-1)))*1e-5;
+ return applyCorrection(tm,corr);
+}
+function calculate(sequence,buffer){
+ const seq=sequence.replace(/\s+/g,"").toUpperCase();
+ if(seq.length<2||seq.length>500||/[^ACGT]/.test(seq))throw Error("Use 2–500 A/C/G/T bases only.");
+ let dh=0,ds=0;
+ for(const b of [seq[0],seq[seq.length-1]]){dh+=b==="A"||b==="T"?2.3:.1;ds+=b==="A"||b==="T"?4.1:-2.8;}
+ for(let i=0;i<seq.length-1;i++){const pair=NN[seq.slice(i,i+2)];dh+=pair[0];ds+=pair[1];}
+ const tm=1000*dh/(ds+1.987*Math.log(buffer.ct*1e-9/4))-273.15;
+ if(!Number.isFinite(tm)||tm<=-273.15)throw Error("Invalid thermodynamic result.");
+ const gc=([...seq].filter(b=>b==="G"||b==="C").length)/seq.length;
+ const mon=salt2004(tm,buffer.na/1000,gc);
+ const combined=salt2008(tm,buffer.na/1000,buffer.mg/1000,gc,seq.length);
+ return {seq,n:seq.length,gc:gc*100,tm,mon,combined};
+}
+function fmt(value){return value.toFixed(2);}
+function showError(id,message){const e=el(id);e.hidden=!message;e.textContent=message;}
+el("calc-form").addEventListener("submit",event=>{
+ event.preventDefault();showError("single-error","");
+ try{
+  const r=calculate(el("sequence").value,readBuffer());
+  el("tm-final").textContent=fmt(r.combined)+" °C";
+  el("tm-na").textContent=fmt(r.mon)+" °C";
+  el("tm-nn").textContent=fmt(r.tm)+" °C";
+  el("gc").textContent=fmt(r.gc)+"%";
+  el("summary").textContent=r.n+" bases · "+r.seq+" · ideal perfectly matched duplex";
+  el("empty").hidden=true;el("single-results").hidden=false;
+ }catch(e){el("single-results").hidden=true;el("empty").hidden=false;showError("single-error",e.message);}
+});
+function parseCSV(text){
+ const rows=[];let row=[],field="",quoted=false;
+ for(let i=0;i<text.length;i++){
+  const ch=text[i];
+  if(quoted){if(ch==='"'&&text[i+1]==='"'){field+='"';i++;}else if(ch==='"'){quoted=false;}else{field+=ch;}}
+  else if(ch==='"'){quoted=true;}
+  else if(ch===","){row.push(field);field="";}
+  else if(ch==="\n"||ch==="\r"){if(ch==="\r"&&text[i+1]==="\n")i++;row.push(field);if(row.some(x=>x.trim()))rows.push(row);row=[];field="";}
+  else{field+=ch;}
+ }
+ if(quoted)throw Error("Unterminated quoted field in CSV.");
+ row.push(field);if(row.some(x=>x.trim()))rows.push(row);
+ const header=(rows.shift()||[]).map(h=>h.trim().toLowerCase()),idx=header.indexOf("sequence"),id=header.indexOf("id");
+ if(idx<0)throw Error("CSV requires a sequence column.");
+ return rows.map((r,i)=>({id:id>=0?r[id]||String(i+1):String(i+1),seq:r[idx]||""}));
+}
+function parseInput(text){
+ text=text.replace(/^\uFEFF/,"").trim();
+ if(!text)return[];
+ if(/^([^\r\n]*,)?sequence\s*(,|$)/i.test(text.split(/\r?\n/)[0]))return parseCSV(text);
+ if(text.startsWith(">")){
+  const records=[];let id="",sequence="";
+  for(const line of text.split(/\r?\n/)){
+   if(line.startsWith(">")){if(id)records.push({id,seq:sequence});id=line.slice(1).trim()||"unnamed";sequence="";}
+   else sequence+=line.trim();
+  }
+  if(id)records.push({id,seq:sequence});
+  return records;
+ }
+ return text.split(/\r?\n/).map((line,i)=>({id:String(i+1),seq:line.trim()})).filter(r=>r.seq);
+}
+let batchResults=[];
+el("batch-run").addEventListener("click",()=>{
+ el("batch-body").replaceChildren();el("batch-table").hidden=true;el("batch-save").disabled=true;batchResults=[];
+ try{
+  const b=readBuffer(),records=parseInput(el("batch").value);
+  if(!records.length)throw Error("Add one or more DNA sequences.");
+  if(records.length>500)throw Error("Maximum 500 sequences per batch.");
+  const fragment=document.createDocumentFragment();
+  for(const record of records){
+   let result=null,error="";
+   try{result=calculate(record.seq,b);}catch(e){error=e.message;}
+   batchResults.push({id:record.id,result,error});
+   const tr=document.createElement("tr");
+   const values=[record.id,result?.n??"",result?fmt(result.gc):"",result?fmt(result.tm):"",result?fmt(result.mon):"",result?fmt(result.combined):"",error];
+   for(const value of values){const td=document.createElement("td");td.textContent=String(value);tr.appendChild(td);}
+   fragment.appendChild(tr);
+  }
+  el("batch-body").appendChild(fragment);
+  el("batch-table").hidden=false;el("batch-save").disabled=false;
+  el("batch-status").textContent=records.length+" sequences processed locally; "+batchResults.filter(r=>r.error).length+" invalid.";
+ }catch(e){el("batch-status").textContent=e.message;}
+});
+el("upload").addEventListener("change",async event=>{
+ const file=event.target.files[0];if(!file)return;
+ if(file.size>1024*1024){el("batch-status").textContent="Maximum file size is 1 MB.";return;}
+ try{el("batch").value=await file.text();el("batch-status").textContent="File loaded; select Calculate batch."; }
+ catch(e){el("batch-status").textContent="Unable to read this file.";}
+ event.target.value="";
+});
+el("batch-save").addEventListener("click",()=>{
+ if(!batchResults.length)return;
+ const esc=v=>{let s=String(v??"");if(/^[=+@-]/.test(s))s="'"+s;return '"'+s.replace(/"/g,'""')+'"';};
+ const headings=["id","sequence","length","gc_pct","tm_nn_C","tm_na_C","tm_mg_C","error"];
+ const data=batchResults.map(({id,result,error})=>[id,result?.seq??"",result?.n??"",result?fmt(result.gc):"",result?fmt(result.tm):"",result?fmt(result.mon):"",result?fmt(result.combined):"",error]);
+ const csv=[headings,...data].map(row=>row.map(esc).join(",")).join("\r\n")+"\r\n";
+ const url=URL.createObjectURL(new Blob([csv],{type:"text/csv;charset=utf-8"}));
+ const link=document.createElement("a");link.href=url;link.download="dna-melting-temperature-results.csv";link.click();
+ setTimeout(()=>URL.revokeObjectURL(url),1000);
+});
+</script>
 </body>
 </html>
