@@ -32,6 +32,9 @@ jobs:
       run: |
         pytest -v
 
+    - name: Check static browser calculator
+      run: node tests/browser_smoke.cjs
+
     - name: Security SAST & Zero-PHI Audit
       run: |
         python -c "
