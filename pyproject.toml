@@ -35,10 +35,12 @@ dev = [
 ]
 
 [project.scripts]
-dna-melting-tm = "cli:main"
+dna-melting-tm = "oligo_tm:main"
+dna-melting-agent = "cli:main"
 
 [tool.setuptools]
 packages = ["agents"]
+py-modules = ["cli", "oligo_tm", "mg2_correction", "secondary_structure", "multi_primer_comparison", "enrichment", "simulator"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests", "test_oligo_tm.py"]
