@@ -1,21 +1,28 @@
-import pytest
-from oligo_tm import calculate_metrics, process_batch
+import csv
+import json
+
+from oligo_tm import calculate_metrics, main, process_batch
 
 
-def test_oligo_tm_single():
-    res = calculate_metrics(v1=12.0, v2=4.0)
-    assert "score" in res
-    assert "classification" in res
-    assert res["score"] > 0
+def test_oligo_tm_single(capsys):
+    result = calculate_metrics("ATCGATCGATCGATCGATCG", na_mM=50, mg_mM=1.5)
+    assert result["tm_mg_corrected_C"] == 59.72
+    assert main(["single", "--sequence", "ATCGATCGATCGATCGATCG"]) == 0
+    assert json.loads(capsys.readouterr().out)["sequence"] == "ATCGATCGATCGATCGATCG"
+
+
+def test_oligo_tm_bad_sequence(capsys):
+    assert main(["single", "--sequence", "NOT-DNA"]) == 2
+    assert "error" in json.loads(capsys.readouterr().out)
 
 
 def test_oligo_tm_batch(tmp_path):
-    csv_in = tmp_path / "in.csv"
-    csv_out = tmp_path / "out.csv"
-    csv_in.write_text("Patient,v1,v2\nPat_001,15.0,3.0\nPat_002,5.0,1.0\n", encoding="utf-8")
-    
-    process_batch(str(csv_in), str(csv_out))
-    assert csv_out.exists()
-    content = csv_out.read_text(encoding="utf-8")
-    assert "Pat_001" in content
-    assert "score" in content
+    source = tmp_path / "in.csv"
+    target = tmp_path / "out.csv"
+    source.write_text("id,sequence\nPrimer_1,ATCGATCGATCGATCGATCG\nPrimer_2,INVALID\n", encoding="utf-8")
+    assert process_batch(str(source), str(target)) == 2
+    with target.open(newline="", encoding="utf-8") as f:
+        rows = list(csv.DictReader(f))
+    assert rows[0]["tm_mg_corrected_C"] == "59.72"
+    assert rows[1]["error"]
+    assert rows[1]["id"] == "Primer_2"
