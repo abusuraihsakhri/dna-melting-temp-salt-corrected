@@ -9,6 +9,8 @@ on:
 jobs:
   test-and-audit:
     runs-on: ubuntu-latest
+    env:
+      AUDIT_SECRET_KEY: ci-${{ github.run_id }}-${{ github.run_attempt }}-ephemeral
     strategy:
       matrix:
         python-version: ["3.10", "3.11", "3.12"]
@@ -24,7 +26,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install fastapi uvicorn pydantic pytest
+        pip install -e '.[dev]'
 
     - name: Run Pytest Suite
       run: |
