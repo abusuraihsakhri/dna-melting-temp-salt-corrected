@@ -1,10 +1,12 @@
 # DNA Melting Temperature — Salt Corrected
 
+### [Open the Live Application →](https://abusuraihsakhri.github.io/dna-melting-temp-salt-corrected/)
+
 A DNA/DNA duplex melting-temperature calculator for sequence-specific oligonucleotide analysis. The primary workflow estimates the melting temperature of a perfectly matched duplex from nearest-neighbor thermodynamics and salt conditions. The browser interface runs locally, without a backend.
 
 ## Use the calculator
 
-Open [the browser calculator](web/index.html) directly, or use the GitHub Pages deployment after it has been configured and verified. Paste an A/C/G/T sequence, set Na⁺, **free** Mg²⁺, and total oligo concentrations, and select **Calculate Tm**. Batch mode accepts one sequence per line, FASTA, or CSV files with a `sequence` header (optional `id`); results can be exported to CSV.
+Open the [live browser calculator](https://abusuraihsakhri.github.io/dna-melting-temp-salt-corrected/) or open the [source page](web/index.html) locally. Paste an A/C/G/T sequence, set Na⁺, **free** Mg²⁺, and total oligo concentrations, and select **Calculate Tm**. Batch mode accepts one sequence per line, FASTA, or CSV files with a `sequence` header (optional `id`); results can be exported to CSV.
 
 Inputs are processed in the browser. The site does not upload sequences, send telemetry, or need server-side dependencies. The application has no external JavaScript, font, or analytics dependencies.
 
